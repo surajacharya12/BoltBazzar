@@ -4,7 +4,7 @@ import bannerImage from '../../images/banner/download.png'
 
 function Home() {
   return (
-<div className="flex justify-center mt-50 md:mt-60 px-4">
+    <div className="flex justify-center mt-60 md:mt-70 px-4">
       <div className="w-full max-w-6xl md:max-w-7xl bg-gradient-to-r from-amber-100 to-yellow-50 dark:from-amber-900 dark:to-yellow-800 shadow-xl rounded-2xl border border-amber-200 dark:border-amber-700 px-10 py-6 md:py-6 flex flex-col md:flex-row items-center gap-12 transition-all duration-300">
 
         {/* Image Section */}
@@ -47,8 +47,8 @@ function Home() {
             Shop Now
           </button>
         </div>
-
       </div>
+
     </div>
   )
 }

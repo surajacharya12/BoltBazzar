@@ -4,7 +4,7 @@ import { ModeToggle } from "./themeMode";
 import { Heart, ShoppingBag, Search, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { navLinks } from "../constant/navlink";
-import { UserButton, SignInButton, useUser, ClerkLoaded, SignedIn } from "@clerk/nextjs";
+import { UserButton, SignInButton, useUser, ClerkLoaded, SignIn, SignedIn } from "@clerk/nextjs";
 
 export default function NavBar() {
   const { isSignedIn } = useUser();
@@ -18,15 +18,25 @@ export default function NavBar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Toggle on Left */}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 text-gray-700 dark:text-gray-300"
               aria-label="Open Menu"
             >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
           </div>
@@ -42,51 +52,14 @@ export default function NavBar() {
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
-              if (!isSignedIn && link.href !== "/") {
-                // For signed out users, show sign-in modal for non-home links
-                return (
-                  <SignInButton mode="modal" key={link.href} afterSignInUrl={link.href}>
-                    <button
-                      className={`relative group text-sm font-medium transition-colors duration-200 ${
-                        isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300"
-                      }`}
-                      type="button"
-                    >
-                      {link.label}
-                      <span
-                        className={`absolute left-0 -bottom-1 h-0.5 w-full bg-indigo-600 dark:bg-indigo-400 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left ${
-                          isActive ? "scale-x-100" : ""
-                        }`}
-                      ></span>
-                    </button>
-                  </SignInButton>
-                );
-              } else if (!isSignedIn && link.href === "/") {
-                // For signed out users, Home link always redirects to root
-                return (
-                  <SignInButton mode="modal" key={link.href} afterSignInUrl="/">
-                    <button
-                      className={`relative group text-sm font-medium transition-colors duration-200 ${
-                        isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300"
-                      }`}
-                      type="button"
-                    >
-                      {link.label}
-                      <span
-                        className={`absolute left-0 -bottom-1 h-0.5 w-full bg-indigo-600 dark:bg-indigo-400 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left ${
-                          isActive ? "scale-x-100" : ""
-                        }`}
-                      ></span>
-                    </button>
-                  </SignInButton>
-                );
-              }
               return (
                 <a
                   key={link.href}
                   href={link.href}
                   className={`relative group text-sm font-medium transition-colors duration-200 ${
-                    isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300"
+                    isActive
+                      ? "text-indigo-600 dark:text-indigo-400"
+                      : "text-gray-700 dark:text-gray-300"
                   }`}
                 >
                   {link.label}
@@ -148,7 +121,9 @@ export default function NavBar() {
             >
               <Heart
                 className={`h-5 w-5 transition-colors ${
-                  isFavActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-600 dark:text-gray-300"
+                  isFavActive
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-gray-600 dark:text-gray-300"
                 }`}
               />
             </button>
@@ -161,7 +136,9 @@ export default function NavBar() {
             >
               <ShoppingBag
                 className={`h-5 w-5 transition-colors ${
-                  isCartActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-600 dark:text-gray-300"
+                  isCartActive
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-gray-600 dark:text-gray-300"
                 }`}
               />
             </button>
@@ -176,7 +153,9 @@ export default function NavBar() {
               </SignedIn>
               {!isSignedIn && (
                 <SignInButton mode="modal">
-                  <button className="text-sm font-medium text-gray-800 dark:text-white">Sign In</button>
+                  <button className="text-sm font-medium text-gray-800 dark:text-white">
+                    Sign In
+                  </button>
                 </SignInButton>
               )}
             </ClerkLoaded>
@@ -205,49 +184,20 @@ export default function NavBar() {
 
           {/* Nav links inside sidebar */}
           <nav className="px-4 py-6 space-y-2">
-            {navLinks.map((link) => {
-              if (!isSignedIn && link.href !== "/") {
-                return (
-                  <SignInButton mode="modal" key={link.href} afterSignInUrl={link.href}>
-                    <button
-                      className={`block px-3 py-2 rounded-md text-base font-medium ${
-                        pathname === link.href ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300"
-                      } hover:bg-indigo-50 dark:hover:bg-gray-800`}
-                      type="button"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {link.label}
-                    </button>
-                  </SignInButton>
-                );
-              } else if (!isSignedIn && link.href === "/") {
-                return (
-                  <SignInButton mode="modal" key={link.href} afterSignInUrl="/">
-                    <button
-                      className={`block px-3 py-2 rounded-md text-base font-medium ${
-                        pathname === link.href ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300"
-                      } hover:bg-indigo-50 dark:hover:bg-gray-800`}
-                      type="button"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {link.label}
-                    </button>
-                  </SignInButton>
-                );
-              }
-              return (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
-                    pathname === link.href ? "text-indigo-600 dark:text-indigo-400" : "text-gray-700 dark:text-gray-300"
-                  } hover:bg-indigo-50 dark:hover:bg-gray-800`}
-                >
-                  {link.label}
-                </a>
-              );
-            })}
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  pathname === link.href
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-gray-700 dark:text-gray-300"
+                } hover:bg-indigo-50 dark:hover:bg-gray-800`}
+              >
+                {link.label}
+              </a>
+            ))}
           </nav>
         </div>
       )}
