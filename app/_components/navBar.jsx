@@ -34,7 +34,7 @@ export default function NavBar() {
           {/* Logo */}
           <div className="flex-shrink-0 ml-2 md:ml-0">
             <a href="/">
-              <img src="/image.png" alt="Logo" className="h-10 w-auto" />
+              <img src="/download.png" alt="Logo" className="h-30 w-auto" />
             </a>
           </div>
 
@@ -190,7 +190,7 @@ export default function NavBar() {
           <div className="flex items-center justify-between px-4 h-16 border-b border-gray-200 dark:border-gray-700">
             {/* Logo inside sidebar */}
             <a href="/" className="flex-shrink-0">
-              <img src="/image.png" alt="Logo" className="h-10 w-auto" />
+              <img src="/download.png" alt="Logo" className="h-30 w-auto" />
             </a>
 
             {/* Close button */}
