@@ -10,8 +10,10 @@ import {
 } from '@clerk/nextjs';
 import { ThemeProvider } from '@/components/components/theme-provider';
 import NavBar from '../_components/navBar'; // Adjust path if needed
+import GuestHome from '../_components/GuestHome';
 
 export default function ClientLayout({ children }) {
+
   return (
     <ClerkProvider>
       <ThemeProvider
@@ -32,7 +34,12 @@ export default function ClientLayout({ children }) {
         </header>
 
         <NavBar />
-        <main className="pt-16">{children}</main>
+        <main className="pt-16">
+          <SignedOut>
+            <GuestHome />
+          </SignedOut>
+          <SignedIn>{children}</SignedIn>
+        </main>
       </ThemeProvider>
     </ClerkProvider>
   );

@@ -1,7 +1,6 @@
-// app/layout.tsx or app/layout.js (Server Component)
 import './globals.css';
 import { Geist, Geist_Mono } from 'next/font/google';
-import ClientLayout from './_components/ClientLayout'; // Create this next
+import ClientLayout from './_components/ClientLayout'; // Your client wrapper (wraps NavBar, etc.)
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
