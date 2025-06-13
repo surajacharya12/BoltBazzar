@@ -10,7 +10,7 @@ const CartScreen = () => {
   const total = cart.reduce((sum, item) => sum + (item.price || 0) * (item.qty || 1), 0);
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4">
+    <div className="max-w-4xl mx-auto py-10 px-4 -mt-25">
       <h1 className="text-2xl font-bold mb-6">Shopping Cart</h1>
       {cart.length === 0 ? (
         <div className="text-center text-gray-500">Your cart is empty.</div>
@@ -32,7 +32,7 @@ const CartScreen = () => {
             ))}
           </div>
           <div className="text-right text-lg font-semibold text-gray-800 dark:text-white">
-            Total: ₹{total}
+            Total: ${total}
           </div>
         </>
       )}

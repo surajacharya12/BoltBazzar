@@ -30,14 +30,15 @@ const Blog = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center w-full h-24 bg-gradient-to-r from-amber-500 to-yellow-400 text-white rounded-xl shadow-md">
-        <span className="text-lg font-semibold animate-pulse">Loading blog...</span>
-      </div>
+        <h1 className="text-4xl md:text-6xl font-extrabold text-white animate-pulse drop-shadow-lg tracking-widest">
+          BoltBazzarr
+        </h1>
+      
     );
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-10">
+    <div className="w-full max-w-7xl mx-auto px-4 py-10 -mt-25">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-3xl font-bold">Latest Blog Posts</h2>
         <Link href="/blog">

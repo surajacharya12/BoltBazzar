@@ -1,10 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Clock, Mail, MapPin, Phone, Facebook, Github, Linkedin, Instagram } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { client } from '@/sanity/lib/client';
+import { useRouter } from 'next/navigation';
 
 // Utility function
 const cn = (...classes) => classes.filter(Boolean).join(' ');
@@ -45,13 +47,6 @@ const quickLinksData = [
   { title: 'Blog', href: '/blog' },
   { title: 'Contact', href: '/contact' },
   { title: 'Hot Deal', href: '/hot-deal' },
-];
-
-const categoriesData = [
-  { title: 'Furniture', href: 'furniture' },
-  { title: 'Decor', href: 'decor' },
-  { title: 'Lighting', href: 'lighting' },
-  { title: 'Outdoors', href: 'outdoors' },
 ];
 
 const contactData = [
@@ -102,6 +97,13 @@ const socialLinks = [
 ];
 
 const Footer = () => {
+  const [categories, setCategories] = useState([]);
+  useEffect(() => {
+    // Fetch categories with product count
+    client.fetch(`*[_type == 'category']{title, "productCount": count(*[_type=='product' && references(^._id)])} | order(productCount desc)[0...7]`)
+      .then((data) => setCategories(data.map(c => c.title)));
+  }, []);
+
   return (
     <footer className="space-y-12 bg-white dark:bg-gray-900 px-6 py-12 text-gray-700 dark:text-gray-300">
 
@@ -182,16 +184,20 @@ const Footer = () => {
         <div>
           <SubTitle>Categories</SubTitle>
           <ul className="space-y-3 mt-4">
-            {categoriesData.map((item) => (
-              <li key={item.title}>
-                <Link
-                  href={`/category/${item.href}`}
-                  className="hover:text-shop_light_green dark:hover:text-shop_light_green transition-colors font-medium"
-                >
-                  {item.title}
-                </Link>
-              </li>
-            ))}
+            {categories.length > 0 ? (
+              categories.map((cat) => (
+                <li key={cat}>
+                  <Link
+                    href={{ pathname: '/shop', query: { category: cat } }}
+                    className="hover:text-shop_light_green dark:hover:text-shop_light_green transition-colors font-medium cursor-pointer"
+                  >
+                    {cat}
+                  </Link>
+                </li>
+              ))
+            ) : (
+              <li className="text-gray-400">No categories found.</li>
+            )}
           </ul>
         </div>
 

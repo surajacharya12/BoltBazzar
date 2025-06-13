@@ -17,15 +17,15 @@ export function StoreProvider({ children }) {
     setFavorites((prev) => prev.filter((item) => item._id !== id));
   };
 
-  const addToCart = (product) => {
+  const addToCart = (product, qty = 1) => {
     setCart((prev) =>
       prev.find((item) => item._id === product._id)
         ? prev.map((item) =>
             item._id === product._id
-              ? { ...item, qty: (item.qty || 1) + 1 }
+              ? { ...item, qty: (item.qty || 1) + qty }
               : item
           )
-        : [...prev, { ...product, qty: 1 }]
+        : [...prev, { ...product, qty }]
     );
   };
 

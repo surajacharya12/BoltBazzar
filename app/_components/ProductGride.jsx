@@ -11,6 +11,7 @@ const ProductGride = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState(productType[0]?.title || "");
+  const [quantities, setQuantities] = useState({});
   const router = useRouter();
   const { favorites, addToFavorites, removeFromFavorites, cart, addToCart } = useStore();
 
@@ -35,6 +36,15 @@ const ProductGride = () => {
     };
     fetchData();
   }, [selectedTab]);
+
+  if (loading) {
+    return (
+        <h1 className="text-4xl md:text-6xl font-extrabold text-white animate-pulse drop-shadow-lg tracking-widest">
+          BoltBazzarr
+        </h1>
+     
+    );
+  }
 
   return (
     <div className="w-full mt-10 px-6 md:px-12">
@@ -73,9 +83,7 @@ const ProductGride = () => {
       )}
 
       {/* Product Display */}
-      {loading ? (
-        <div className="text-center text-gray-500 text-lg">Loading products...</div>
-      ) : products.length > 0 ? (
+      {products.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {products.slice(0, 8).map((product) => {
             const isFav = favorites.some((item) => item._id === product._id);
@@ -83,6 +91,7 @@ const ProductGride = () => {
               product.images && product.images.length > 0
                 ? urlFor(product.images[0]).url()
                 : "/placeholder.jpg";
+            const qty = quantities[product._id] || 1;
 
             return (
               <div
@@ -155,13 +164,33 @@ const ProductGride = () => {
                     )}
                   </div>
 
-                  {/* Add to Cart */}
-                  <Button
-                    className="mt-3 w-full rounded-full bg-emerald-600 text-white hover:bg-emerald-700 transition"
-                    onClick={() => addToCart(product)}
-                  >
-                    Add to Cart
-                  </Button>
+                  {/* Quantity and Add to Cart */}
+                  <div className="flex items-center gap-2 mt-3">
+                    <button
+                      className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-lg font-bold text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                      onClick={() => setQuantities(q => ({ ...q, [product._id]: Math.max(1, (q[product._id] || 1) - 1) }))}
+                      disabled={qty <= 1}
+                      aria-label="Decrease quantity"
+                    >
+                      -
+                    </button>
+                    <span className="text-base font-semibold w-6 text-center">{qty}</span>
+                    <button
+                      className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-lg font-bold text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                      onClick={() => setQuantities(q => ({ ...q, [product._id]: Math.min((product.stock || 99), (q[product._id] || 1) + 1) }))}
+                      disabled={qty >= (product.stock || 99)}
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                    <Button
+                      className="flex-1 bg-emerald-600 text-white hover:bg-emerald-700 transition ml-2"
+                      onClick={() => addToCart(product, qty)}
+                      disabled={product.stock === 0}
+                    >
+                      Add to Cart
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
