@@ -5,6 +5,12 @@ import { Heart, ShoppingBag, Search, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { navLinks } from "../constant/navlink";
 import { UserButton, SignInButton, useUser, ClerkLoaded, SignIn, SignedIn } from "@clerk/nextjs";
+import { useStore } from "./store";
+import { useRouter } from "next/navigation";
+import { client } from "@/sanity/lib/client";
+import { urlFor } from "@/sanity/lib/image";
+
+export const query = `*[_type == "product" && name match $term] | order(name desc) { ..., "category": categories[]->title }`;
 
 export default function NavBar() {
   const { isSignedIn } = useUser();
@@ -13,6 +19,32 @@ export default function NavBar() {
   const pathname = usePathname();
   const [isFavActive, setIsFavActive] = useState(false);
   const [isCartActive, setIsCartActive] = useState(false);
+  const { favorites, cart } = useStore();
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchActive, setSearchActive] = useState(false);
+
+  // Live search: fetch as user types
+  React.useEffect(() => {
+    if (!searchTerm.trim()) {
+      setSearchResults([]);
+      setSearchActive(false);
+      return;
+    }
+    const fetchSearch = async () => {
+      setSearchActive(true);
+      const query = `*[_type == "product" && name match $term] | order(name desc) { ..., "category": categories[]->title }`;
+      const params = { term: `*${searchTerm}*` };
+      try {
+        const results = await client.fetch(query, params);
+        setSearchResults(results);
+      } catch (err) {
+        setSearchResults([]);
+      }
+    };
+    fetchSearch();
+  }, [searchTerm]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
@@ -86,61 +118,155 @@ export default function NavBar() {
                   <Search className="h-5 w-5" />
                 </button>
               ) : (
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="pl-3 pr-3 py-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-36"
-                  />
-                  <button
-                    onClick={() => setMobileSearchOpen(false)}
-                    className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700 dark:text-gray-300"
-                    aria-label="Close Search"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+                <div className="flex flex-col w-full relative">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                      className="pl-3 pr-3 py-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-36"
+                    />
+                    <button
+                      onClick={() => { setMobileSearchOpen(false); setSearchTerm(""); setSearchActive(false); }}
+                      className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700 dark:text-gray-300"
+                      aria-label="Close Search"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+                  {/* Mobile Search Results Dropdown */}
+                  {searchActive && searchResults.length > 0 && (
+                    <div className="absolute left-0 top-10 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-50 max-h-80 overflow-y-auto">
+                      {searchResults.map(product => {
+                        let imageUrl = "/placeholder.jpg";
+                        if (product.images && product.images.length > 0) {
+                          try {
+                            imageUrl = urlFor(product.images[0]).url();
+                          } catch {
+                            imageUrl = product.images[0].asset?.url || "/placeholder.jpg";
+                          }
+                        }
+                        return (
+                          <div
+                            key={product._id}
+                            className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                            onClick={() => {
+                              router.push(`/product/${product.slug?.current || product._id}`);
+                              setSearchActive(false);
+                              setSearchTerm("");
+                              setMobileSearchOpen(false);
+                            }}
+                          >
+                            <img
+                              src={imageUrl}
+                              alt={product.name}
+                              className="w-16 h-16 object-cover rounded"
+                            />
+                            <div>
+                              <div className="font-semibold text-gray-900 dark:text-white">{product.name}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">{product.category?.join(", ") || "Categories"}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Desktop Search Input */}
             <div className="hidden md:flex relative">
-              <input
-                type="text"
-                placeholder="Search..."
-                className="pl-10 pr-4 py-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              <Search className="absolute left-2 top-1.5 h-4 w-4 text-gray-400" />
+              {/* Remove the form, use a div instead for live search */}
+              <div className="w-full flex">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                <span className="absolute left-2 top-1.5 h-4 w-4 text-gray-400 bg-transparent border-none">
+                  <Search className="h-4 w-4" />
+                </span>
+              </div>
+              {/* Search Results Dropdown */}
+              {searchActive && searchResults.length > 0 && (
+                <div className="absolute left-0 top-10 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded shadow-lg z-50 max-h-80 overflow-y-auto">
+                  {searchResults.map(product => {
+                    let imageUrl = "/placeholder.jpg";
+                    if (product.images && product.images.length > 0) {
+                      try {
+                        imageUrl = urlFor(product.images[0]).url();
+                      } catch {
+                        imageUrl = product.images[0].asset?.url || "/placeholder.jpg";
+                      }
+                    }
+                    return (
+                      <div
+                        key={product._id}
+                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                        onClick={() => {
+                          router.push(`/product/${product.slug?.current || product._id}`);
+                          setSearchActive(false);
+                          setSearchTerm("");
+                        }}
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={product.name}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                        <div>
+                          <div className="font-semibold text-gray-900 dark:text-white">{product.name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{product.category?.join(", ") || "Categories"}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Favorite Button */}
             <button
-              onClick={() => setIsFavActive(!isFavActive)}
-              className="p-1 rounded-full focus:outline-none"
+              onClick={() => router.push("/favorites")}
+              className="p-1 rounded-full focus:outline-none relative"
               aria-label="Favorite"
             >
               <Heart
                 className={`h-5 w-5 transition-colors ${
-                  isFavActive
+                  favorites.length > 0
                     ? "text-indigo-600 dark:text-indigo-400"
                     : "text-gray-600 dark:text-gray-300"
                 }`}
               />
+              {favorites.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
+                  {favorites.length}
+                </span>
+              )}
             </button>
 
             {/* Cart Button */}
             <button
-              onClick={() => setIsCartActive(!isCartActive)}
-              className="p-1 rounded-full focus:outline-none"
+              onClick={() => router.push("/cart")}
+              className="p-1 rounded-full focus:outline-none relative"
               aria-label="Cart"
             >
               <ShoppingBag
                 className={`h-5 w-5 transition-colors ${
-                  isCartActive
+                  cart.length > 0
                     ? "text-indigo-600 dark:text-indigo-400"
                     : "text-gray-600 dark:text-gray-300"
                 }`}
               />
+              {cart.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs rounded-full px-1">
+                  {cart.length}
+                </span>
+              )}
             </button>
 
             {/* Theme Toggle */}

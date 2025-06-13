@@ -73,7 +73,7 @@ const contactData = [
   },
   {
     title: 'Email Us',
-    subtitle: 'Shopcart@gmail.com',
+    subtitle: 'boltbazaar@gmail.com',
     icon: <Mail className="h-6 w-6 text-gray-600 dark:text-gray-400 group-hover:text-primary transition-colors" />,
   },
 ];

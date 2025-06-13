@@ -1,5 +1,5 @@
-import Blog from "../_components/Blog";
+import BlogeDisplay from "../_components/blogDisplay";
 
 export default function BlogPage() {
-  return <Blog />;
+  return <BlogeDisplay />;
 }

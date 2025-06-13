@@ -1,6 +1,7 @@
 import './globals.css';
 import { Geist, Geist_Mono } from 'next/font/google';
 import ClientLayout from './_components/ClientLayout'; // Your client wrapper (wraps NavBar, etc.)
+import { StoreProvider } from "./_components/store";
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -21,7 +22,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ClientLayout>{children}</ClientLayout>
+        <StoreProvider>
+          <ClientLayout>{children}</ClientLayout>
+        </StoreProvider>
       </body>
     </html>
   );
